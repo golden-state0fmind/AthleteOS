@@ -79,6 +79,7 @@ export default function NutritionPage() {
       // Save each item as a separate entry
       for (const item of data.items) {
         await addNutritionEntry({
+          timestamp: new Date().toISOString(),
           date: selectedDate,
           foodName: item.description,
           servingSize: '1 serving',
@@ -91,6 +92,7 @@ export default function NutritionPage() {
             sodium: item.sodium,
           },
           status: 'consumed',
+          warnings: [],
         });
       }
       
