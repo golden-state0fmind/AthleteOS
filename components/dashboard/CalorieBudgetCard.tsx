@@ -82,9 +82,9 @@ export const CalorieBudgetCard: React.FC<CalorieBudgetCardProps> = ({
       {/* Progress bar */}
       <div className="mb-3">
         <ProgressBar 
-          progress={percentage} 
+          value={netCalories} 
+          max={caloriesTarget}
           variant={status.color}
-          showLabel={false}
         />
       </div>
 
