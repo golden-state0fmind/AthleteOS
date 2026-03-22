@@ -14,6 +14,7 @@ import type {
   NutritionEntry,
   SupplementEntry,
   SupplementChecklistEntry,
+  WaterIntakeEntry,
   ChatMessage,
 } from '../types/db';
 
@@ -36,6 +37,7 @@ export async function exportUserData(): Promise<ExportData> {
   const nutrition = await getAllFromStore<NutritionEntry>(db, 'nutrition');
   const supplements = await getAllFromStore<SupplementEntry>(db, 'supplements');
   const supplementChecklist = await getAllFromStore<SupplementChecklistEntry>(db, 'supplementChecklist');
+  const waterIntake = await getAllFromStore<WaterIntakeEntry>(db, 'waterIntake');
   const chatHistory = await getAllFromStore<ChatMessage>(db, 'chatHistory');
 
   // Construct export data with version and timestamp
@@ -47,6 +49,7 @@ export async function exportUserData(): Promise<ExportData> {
     nutrition,
     supplements,
     supplementChecklist,
+    waterIntake,
     chatHistory,
   };
 
@@ -109,6 +112,13 @@ export async function importUserData(exportData: ExportData): Promise<void> {
   if (exportData.supplementChecklist && Array.isArray(exportData.supplementChecklist)) {
     for (const checklistEntry of exportData.supplementChecklist) {
       await putToStore(db, 'supplementChecklist', checklistEntry);
+    }
+  }
+
+  // Import water intake
+  if (exportData.waterIntake && Array.isArray(exportData.waterIntake)) {
+    for (const entry of exportData.waterIntake) {
+      await putToStore(db, 'waterIntake', entry);
     }
   }
 

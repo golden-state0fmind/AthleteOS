@@ -10,6 +10,7 @@ import { getUserProfile } from '@/lib/services/userProfileService';
 import { getWorkouts, calculateWorkoutStreak } from '@/lib/services/workoutService';
 import { getNutritionByDate, getDailyTotals } from '@/lib/services/nutritionService';
 import { getTodayChecklist } from '@/lib/services/supplementService';
+import { getDailyWaterTotal } from '@/lib/services/waterIntakeService';
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -22,6 +23,8 @@ export default function DashboardPage() {
   const [workoutCount, setWorkoutCount] = useState(0);
   const [supplementsTaken, setSupplementsTaken] = useState(0);
   const [supplementsScheduled, setSupplementsScheduled] = useState(0);
+  const [waterIntake, setWaterIntake] = useState(0);
+  const [waterTarget, setWaterTarget] = useState(128); // 1 gallon
   const [currentStreak, setCurrentStreak] = useState(0);
   const [longestStreak, setLongestStreak] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
@@ -70,6 +73,11 @@ export default function DashboardPage() {
     const dailyTotals = await getDailyTotals(today);
     setCaloriesConsumed(dailyTotals.calories || 0);
     setCaloriesTarget(profile.macroTargets?.calories);
+    
+    // Load water intake
+    const waterTotal = await getDailyWaterTotal(today);
+    setWaterIntake(waterTotal);
+    setWaterTarget(profile.dailyWaterTarget || 128); // 1 gallon default
     
     // Load today's workouts
     const todayStart = new Date(today).toISOString();
@@ -127,6 +135,8 @@ export default function DashboardPage() {
             workoutCount={workoutCount}
             supplementsTaken={supplementsTaken}
             supplementsScheduled={supplementsScheduled}
+            waterIntake={waterIntake}
+            waterTarget={waterTarget}
           />
 
           {/* Streak Display */}

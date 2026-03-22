@@ -32,6 +32,9 @@ export default function SettingsPage() {
   const [carbohydrates, setCarbohydrates] = useState('');
   const [fats, setFats] = useState('');
 
+  // Water target
+  const [waterTarget, setWaterTarget] = useState('128'); // 1 gallon
+
   useEffect(() => {
     loadProfile();
   }, []);
@@ -46,6 +49,7 @@ export default function SettingsPage() {
         setWeight(profile.weight.toString());
         setHeight(profile.height.toString());
         setFitnessGoal(profile.fitnessGoal);
+        setWaterTarget((profile.dailyWaterTarget || 128).toString()); // 1 gallon default
 
         if (profile.macroTargets) {
           setHasTargets(true);
@@ -125,6 +129,7 @@ export default function SettingsPage() {
         weight: parseFloat(weight),
         height: parseFloat(height),
         fitnessGoal,
+        dailyWaterTarget: parseInt(waterTarget) || 128, // 1 gallon default
       };
 
       if (hasTargets) {
@@ -302,8 +307,22 @@ export default function SettingsPage() {
 
         {/* Macro Targets */}
         <Card padding="lg" className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Macro Targets</h2>
+          <h2 className="text-xl font-semibold text-white mb-4">Daily Targets</h2>
           
+          {/* Water Target */}
+          <div className="mb-6">
+            <Input
+              label="Daily Water Target (oz)"
+              type="number"
+              value={waterTarget}
+              onChange={(e) => setWaterTarget(e.target.value)}
+              helperText="Recommended: 64-128oz per day (1 gallon = 128oz)"
+              min="16"
+              max="300"
+            />
+          </div>
+
+          {/* Macro Targets */}
           <div className="mb-4">
             <label className="flex items-center gap-2 cursor-pointer">
               <input

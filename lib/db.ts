@@ -9,7 +9,7 @@
  */
 
 const DB_NAME = 'athleteos-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 /**
  * Opens and initializes the IndexedDB database with schema version 1.
@@ -50,8 +50,13 @@ export function initDB(): Promise<IDBDatabase> {
         createSchemaV1(db);
       }
 
+      // Upgrade to version 2: Add waterIntake object store
+      if (event.oldVersion < 2) {
+        upgradeToV2(db);
+      }
+
       // Future version upgrades can be handled here
-      // if (event.oldVersion < 2) { ... }
+      // if (event.oldVersion < 3) { ... }
     };
   });
 }
@@ -109,6 +114,22 @@ function createSchemaV1(db: IDBDatabase): void {
   if (!db.objectStoreNames.contains('chatHistory')) {
     const chatStore = db.createObjectStore('chatHistory', { keyPath: 'id' });
     chatStore.createIndex('timestamp', 'timestamp', { unique: false });
+  }
+}
+
+/**
+ * Upgrades the database schema to version 2.
+ * Adds the waterIntake object store.
+ * 
+ * @param db The IDBDatabase instance
+ */
+function upgradeToV2(db: IDBDatabase): void {
+  // Object Store: waterIntake
+  // Stores water intake entries with date and timestamp indexes
+  if (!db.objectStoreNames.contains('waterIntake')) {
+    const waterStore = db.createObjectStore('waterIntake', { keyPath: 'id' });
+    waterStore.createIndex('date', 'date', { unique: false });
+    waterStore.createIndex('timestamp', 'timestamp', { unique: false });
   }
 }
 

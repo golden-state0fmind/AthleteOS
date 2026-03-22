@@ -21,6 +21,7 @@ export interface UserProfile {
     carbohydrates: number; // grams
     fats: number; // grams
   };
+  dailyWaterTarget?: number; // fluid ounces (default: 128oz = 1 gallon)
   createdAt: string; // ISO 8601 timestamp
   updatedAt: string; // ISO 8601 timestamp
 }
@@ -99,6 +100,17 @@ export interface SupplementChecklistEntry {
 }
 
 /**
+ * Water intake entry stored in the waterIntake object store
+ */
+export interface WaterIntakeEntry {
+  id: string; // UUID
+  timestamp: string; // ISO 8601 timestamp
+  date: string; // YYYY-MM-DD for grouping
+  amount: number; // fluid ounces
+  createdAt: string; // ISO 8601 timestamp
+}
+
+/**
  * Chat message stored in the chatHistory object store
  */
 export interface ChatMessage {
@@ -119,5 +131,6 @@ export interface ExportData {
   nutrition: NutritionEntry[];
   supplements: SupplementEntry[];
   supplementChecklist: SupplementChecklistEntry[];
+  waterIntake: WaterIntakeEntry[];
   chatHistory: ChatMessage[];
 }

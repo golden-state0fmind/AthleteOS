@@ -7,6 +7,8 @@ export interface DailyMetricsProps {
   workoutCount: number;
   supplementsTaken: number;
   supplementsScheduled: number;
+  waterIntake?: number; // fluid ounces
+  waterTarget?: number; // fluid ounces
 }
 
 export const DailyMetrics: React.FC<DailyMetricsProps> = ({
@@ -15,10 +17,20 @@ export const DailyMetrics: React.FC<DailyMetricsProps> = ({
   workoutCount,
   supplementsTaken,
   supplementsScheduled,
+  waterIntake = 0,
+  waterTarget = 128, // 1 gallon in ounces
 }) => {
   const supplementPercentage = supplementsScheduled > 0 
     ? Math.round((supplementsTaken / supplementsScheduled) * 100) 
     : 0;
+
+  const waterPercentage = waterTarget > 0
+    ? Math.round((waterIntake / waterTarget) * 100)
+    : 0;
+
+  const formatWater = (oz: number) => {
+    return `${oz}oz`;
+  };
 
   return (
     <Card padding="md">
@@ -67,6 +79,25 @@ export const DailyMetrics: React.FC<DailyMetricsProps> = ({
           </div>
           <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
             <span className="text-accent text-xl">💊</span>
+          </div>
+        </div>
+
+        {/* Water Intake */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm text-white/60">Water</p>
+            <p className="text-2xl font-bold text-white">
+              {formatWater(waterIntake)}
+              <span className="text-base text-white/60 ml-1">
+                / {formatWater(waterTarget)}
+              </span>
+              <span className="text-base text-white/60 ml-2">
+                ({waterPercentage}%)
+              </span>
+            </p>
+          </div>
+          <div className="w-12 h-12 rounded-full bg-accent/20 flex items-center justify-center">
+            <span className="text-accent text-xl">💧</span>
           </div>
         </div>
       </div>

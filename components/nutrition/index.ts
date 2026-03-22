@@ -3,6 +3,7 @@ export { DailyTotals } from './DailyTotals';
 export { MacroProgress } from './MacroProgress';
 export { GoalWarning } from './GoalWarning';
 export { QuickAddModal } from './QuickAddModal';
+export { WaterIntakeCard } from './WaterIntakeCard';
 
 export type { NutritionCardProps } from './NutritionCard';
 export type { DailyTotalsProps } from './DailyTotals';

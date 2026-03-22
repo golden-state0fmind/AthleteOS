@@ -8,10 +8,12 @@ import { NutritionCard } from '@/components/nutrition/NutritionCard';
 import { DailyTotals } from '@/components/nutrition/DailyTotals';
 import { MacroProgress } from '@/components/nutrition/MacroProgress';
 import { QuickAddModal } from '@/components/nutrition/QuickAddModal';
+import { WaterIntakeCard } from '@/components/nutrition/WaterIntakeCard';
 import { Button } from '@/components/ui/Button';
 import { getNutritionByDate, getDailyTotals, updateEntryStatus, addNutritionEntry } from '@/lib/services/nutritionService';
 import { getUserProfile } from '@/lib/services/userProfileService';
-import type { NutritionEntry, MacroData } from '@/lib/types/db';
+import { getWaterIntakeByDate, getDailyWaterTotal, addWaterIntake, deleteWaterIntake } from '@/lib/services/waterIntakeService';
+import type { NutritionEntry, MacroData, WaterIntakeEntry } from '@/lib/types/db';
 
 export default function NutritionPage() {
   const router = useRouter();
@@ -28,6 +30,9 @@ export default function NutritionPage() {
   const [macroTargets, setMacroTargets] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
+  const [waterIntake, setWaterIntake] = useState(0);
+  const [waterTarget, setWaterTarget] = useState(128); // 1 gallon
+  const [waterEntries, setWaterEntries] = useState<WaterIntakeEntry[]>([]);
 
   useEffect(() => {
     loadData();
@@ -40,6 +45,9 @@ export default function NutritionPage() {
       if (profile?.macroTargets) {
         setMacroTargets(profile.macroTargets);
       }
+      if (profile?.dailyWaterTarget) {
+        setWaterTarget(profile.dailyWaterTarget);
+      }
 
       // Load nutrition entries for selected date
       const nutritionData = await getNutritionByDate(selectedDate);
@@ -48,6 +56,12 @@ export default function NutritionPage() {
       // Calculate daily totals
       const totals = await getDailyTotals(selectedDate);
       setDailyTotals(totals);
+
+      // Load water intake data
+      const waterData = await getWaterIntakeByDate(selectedDate);
+      setWaterEntries(waterData);
+      const waterTotal = await getDailyWaterTotal(selectedDate);
+      setWaterIntake(waterTotal);
     } catch (error) {
       console.error('Error loading nutrition data:', error);
     } finally {
@@ -100,6 +114,29 @@ export default function NutritionPage() {
       await loadData();
     } catch (error) {
       console.error('Error saving quick add entries:', error);
+    }
+  };
+
+  const handleAddWater = async (amount: number) => {
+    try {
+      const now = new Date();
+      await addWaterIntake({
+        timestamp: now.toISOString(),
+        date: selectedDate,
+        amount,
+      });
+      await loadData();
+    } catch (error) {
+      console.error('Error adding water intake:', error);
+    }
+  };
+
+  const handleDeleteWaterEntry = async (id: string) => {
+    try {
+      await deleteWaterIntake(id);
+      await loadData();
+    } catch (error) {
+      console.error('Error deleting water entry:', error);
     }
   };
 
@@ -172,6 +209,17 @@ export default function NutritionPage() {
         {/* Daily totals */}
         <div className="mb-6">
           <DailyTotals totals={dailyTotals} />
+        </div>
+
+        {/* Water Intake */}
+        <div className="mb-6">
+          <WaterIntakeCard
+            totalIntake={waterIntake}
+            target={waterTarget}
+            entries={waterEntries}
+            onAddWater={handleAddWater}
+            onDeleteEntry={handleDeleteWaterEntry}
+          />
         </div>
 
         {/* Macro progress (if targets are set) */}
