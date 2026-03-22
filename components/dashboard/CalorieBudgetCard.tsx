@@ -33,7 +33,7 @@ export const CalorieBudgetCard: React.FC<CalorieBudgetCardProps> = ({
       if (remainingBudget > 0) {
         return { color: 'success' as const, label: 'Deficit', emoji: '✅' };
       } else {
-        return { color: 'error' as const, label: 'Surplus', emoji: '⚠️' };
+        return { color: 'danger' as const, label: 'Surplus', emoji: '⚠️' };
       }
     } else if (fitnessGoal === 'build muscle') {
       // For muscle building, meeting target is important
@@ -96,7 +96,7 @@ export const CalorieBudgetCard: React.FC<CalorieBudgetCardProps> = ({
           </p>
           <p className={`text-2xl font-bold ${
             status.color === 'success' ? 'text-green-400' : 
-            status.color === 'error' ? 'text-red-400' : 
+            status.color === 'danger' ? 'text-red-400' : 
             'text-yellow-400'
           }`}>
             {Math.abs(remainingBudget).toFixed(0)}
@@ -113,7 +113,7 @@ export const CalorieBudgetCard: React.FC<CalorieBudgetCardProps> = ({
         <div className="flex items-center justify-between">
           <p className={`text-sm font-medium ${
             status.color === 'success' ? 'text-green-400' : 
-            status.color === 'error' ? 'text-red-400' : 
+            status.color === 'danger' ? 'text-red-400' : 
             'text-yellow-400'
           }`}>
             {status.label}
