@@ -51,7 +51,7 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pb-24">
       {/* Backdrop with subtle animation (Requirement 26.4) */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-200"
@@ -61,7 +61,7 @@ export const Modal: React.FC<ModalProps> = ({
       
       {/* Modal content - Dark theme (Requirements 26.1, 26.2) */}
       <div
-        className={`relative w-full ${sizeStyles[size]} bg-background border border-white/10 rounded-lg shadow-2xl transition-all duration-200`}
+        className={`relative w-full ${sizeStyles[size]} bg-background border border-white/10 rounded-lg shadow-2xl transition-all duration-200 my-auto`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? 'modal-title' : undefined}
@@ -85,7 +85,7 @@ export const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Body */}
-        <div className="p-6">
+        <div className="p-6 max-h-[70vh] overflow-y-auto">
           {children}
         </div>
 

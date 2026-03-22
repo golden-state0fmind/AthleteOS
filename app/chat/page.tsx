@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Navigation } from '@/components/layout/Navigation';
@@ -14,7 +14,7 @@ import { getActiveSupplements } from '@/lib/services/supplementService';
 import { buildSystemPrompt, type ChatContext } from '@/lib/chatContext';
 import type { ChatMessage } from '@/lib/types/db';
 
-export default function ChatPage() {
+function ChatPageContent() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -198,5 +198,21 @@ export default function ChatPage() {
 
       <Navigation />
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background pb-24 flex flex-col">
+        <Header title="AI Coach" showBackButton={false} />
+        <div className="flex-1 flex items-center justify-center">
+          <p className="text-text-secondary">Loading...</p>
+        </div>
+        <Navigation />
+      </div>
+    }>
+      <ChatPageContent />
+    </Suspense>
   );
 }

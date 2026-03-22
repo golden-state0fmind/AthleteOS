@@ -17,10 +17,19 @@ export default function OnboardingPage() {
 
   // Form data
   const [name, setName] = useState('');
-  const [age, setAge] = useState('');
+  const [dobMonth, setDobMonth] = useState('');
+  const [dobDay, setDobDay] = useState('');
+  const [dobYear, setDobYear] = useState('');
   const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [heightFeet, setHeightFeet] = useState('');
+  const [heightInches, setHeightInches] = useState('');
   const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal | ''>('');
+
+  // Refs for auto-focus
+  const dobDayInputRef = React.useRef<HTMLInputElement>(null);
+  const dobYearInputRef = React.useRef<HTMLInputElement>(null);
+  const inchesInputRef = React.useRef<HTMLInputElement>(null);
+  const weightInputRef = React.useRef<HTMLInputElement>(null);
 
   const totalSteps = 5;
 
@@ -34,21 +43,43 @@ export default function OnboardingPage() {
         }
         break;
       case 2:
-        const ageNum = parseInt(age);
-        if (!age || isNaN(ageNum) || ageNum < 13 || ageNum > 120) {
-          newErrors.age = 'Please enter a valid age (13-120)';
+        const month = parseInt(dobMonth);
+        const day = parseInt(dobDay);
+        const year = parseInt(dobYear);
+        const currentYear = new Date().getFullYear();
+        
+        if (!dobMonth || isNaN(month) || month < 1 || month > 12) {
+          newErrors.dobMonth = 'Invalid month';
+        }
+        if (!dobDay || isNaN(day) || day < 1 || day > 31) {
+          newErrors.dobDay = 'Invalid day';
+        }
+        if (!dobYear || isNaN(year) || year < currentYear - 120 || year > currentYear - 13) {
+          newErrors.dobYear = 'Must be 13-120 years old';
+        }
+        
+        // Validate actual date
+        if (dobMonth && dobDay && dobYear && Object.keys(newErrors).length === 0) {
+          const date = new Date(year, month - 1, day);
+          if (date.getMonth() !== month - 1 || date.getDate() !== day) {
+            newErrors.dobDay = 'Invalid date';
+          }
         }
         break;
       case 3:
         const weightNum = parseFloat(weight);
-        if (!weight || isNaN(weightNum) || weightNum < 20 || weightNum > 300) {
-          newErrors.weight = 'Please enter a valid weight (20-300 kg)';
+        if (!weight || isNaN(weightNum) || weightNum < 50 || weightNum > 700) {
+          newErrors.weight = 'Please enter a valid weight (50-700 lbs)';
         }
         break;
       case 4:
-        const heightNum = parseFloat(height);
-        if (!height || isNaN(heightNum) || heightNum < 100 || heightNum > 250) {
-          newErrors.height = 'Please enter a valid height (100-250 cm)';
+        const feetNum = parseInt(heightFeet);
+        const inchesNum = parseInt(heightInches);
+        if (!heightFeet || isNaN(feetNum) || feetNum < 3 || feetNum > 8) {
+          newErrors.heightFeet = 'Please enter valid feet (3-8)';
+        }
+        if (heightInches && (isNaN(inchesNum) || inchesNum < 0 || inchesNum > 11)) {
+          newErrors.heightInches = 'Please enter valid inches (0-11)';
         }
         break;
       case 5:
@@ -83,11 +114,27 @@ export default function OnboardingPage() {
     setIsSubmitting(true);
 
     try {
+      // Calculate age from DOB
+      const birthDate = new Date(parseInt(dobYear), parseInt(dobMonth) - 1, parseInt(dobDay));
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+      
+      // Convert feet and inches to cm for storage
+      const totalInches = (parseInt(heightFeet) * 12) + (parseInt(heightInches) || 0);
+      const heightInCm = totalInches * 2.54;
+      
+      // Convert lbs to kg for storage
+      const weightInKg = parseFloat(weight) * 0.453592;
+
       await createUserProfile({
         name: name.trim(),
-        age: parseInt(age),
-        weight: parseFloat(weight),
-        height: parseFloat(height),
+        age: age,
+        weight: weightInKg,
+        height: heightInCm,
         fitnessGoal: fitnessGoal as FitnessGoal,
       });
 
@@ -145,18 +192,74 @@ export default function OnboardingPage() {
             </div>
           )}
 
-          {/* Step 2: Age */}
+          {/* Step 2: Date of Birth */}
           {step === 2 && (
             <div>
-              <h2 className="text-xl font-semibold text-white mb-4">How old are you?</h2>
-              <Input
-                type="number"
-                placeholder="Enter your age"
-                value={age}
-                onChange={(e) => setAge(e.target.value)}
-                error={errors.age}
-                autoFocus
-              />
+              <h2 className="text-xl font-semibold text-white mb-4">What's your date of birth?</h2>
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="MM"
+                    value={dobMonth}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 2) {
+                        setDobMonth(value);
+                        // Auto-advance after 2 digits
+                        if (value.length === 2 && dobDayInputRef.current) {
+                          dobDayInputRef.current.focus();
+                        }
+                      }
+                    }}
+                    error={errors.dobMonth}
+                    helperText="Month"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    ref={dobDayInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="DD"
+                    value={dobDay}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 2) {
+                        setDobDay(value);
+                        // Auto-advance after 2 digits
+                        if (value.length === 2 && dobYearInputRef.current) {
+                          dobYearInputRef.current.focus();
+                        }
+                      }
+                    }}
+                    error={errors.dobDay}
+                    helperText="Day"
+                  />
+                </div>
+                <div className="flex-[1.5]">
+                  <Input
+                    ref={dobYearInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="YYYY"
+                    value={dobYear}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 4) {
+                        setDobYear(value);
+                      }
+                    }}
+                    error={errors.dobYear}
+                    helperText="Year"
+                  />
+                </div>
+              </div>
             </div>
           )}
 
@@ -165,12 +268,17 @@ export default function OnboardingPage() {
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">What's your weight?</h2>
               <Input
-                type="number"
-                placeholder="Enter your weight (kg)"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Enter your weight (lbs)"
                 value={weight}
-                onChange={(e) => setWeight(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, '');
+                  setWeight(value);
+                }}
                 error={errors.weight}
-                helperText="Weight in kilograms"
+                helperText="Weight in pounds"
                 autoFocus
               />
             </div>
@@ -180,15 +288,48 @@ export default function OnboardingPage() {
           {step === 4 && (
             <div>
               <h2 className="text-xl font-semibold text-white mb-4">What's your height?</h2>
-              <Input
-                type="number"
-                placeholder="Enter your height (cm)"
-                value={height}
-                onChange={(e) => setHeight(e.target.value)}
-                error={errors.height}
-                helperText="Height in centimeters"
-                autoFocus
-              />
+              <div className="flex gap-3">
+                <div className="flex-1">
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Feet"
+                    value={heightFeet}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 1) {
+                        setHeightFeet(value);
+                        // Auto-advance to inches after entering 1 digit
+                        if (value.length === 1 && inchesInputRef.current) {
+                          inchesInputRef.current.focus();
+                        }
+                      }
+                    }}
+                    error={errors.heightFeet}
+                    helperText="ft"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex-1">
+                  <Input
+                    ref={inchesInputRef}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    placeholder="Inches"
+                    value={heightInches}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (value.length <= 2) {
+                        setHeightInches(value);
+                      }
+                    }}
+                    error={errors.heightInches}
+                    helperText="in"
+                  />
+                </div>
+              </div>
             </div>
           )}
 

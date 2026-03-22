@@ -6,15 +6,16 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   helperText?: string;
 }
 
-export const Input: React.FC<InputProps> = ({
+export const Input = React.forwardRef<HTMLInputElement, InputProps>(({
   label,
   error,
   helperText,
   className = '',
   id,
   ...props
-}) => {
-  const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+}, ref) => {
+  const inputId = React.useId();
+  const finalId = id || inputId;
 
   // Dark theme with accent color (Requirements 26.1, 26.2)
   const baseStyles = 'w-full min-h-[44px] px-4 py-3 bg-white/5 border rounded-lg text-white placeholder-white/40 transition-colors duration-200';
@@ -24,12 +25,13 @@ export const Input: React.FC<InputProps> = ({
   return (
     <div className="w-full">
       {label && (
-        <label htmlFor={inputId} className="block text-sm font-medium text-white/80 mb-2">
+        <label htmlFor={finalId} className="block text-sm font-medium text-white/80 mb-2">
           {label}
         </label>
       )}
       <input
-        id={inputId}
+        ref={ref}
+        id={finalId}
         className={`${baseStyles} ${error ? errorStyles : normalStyles} ${className}`}
         {...props}
       />
@@ -41,4 +43,6 @@ export const Input: React.FC<InputProps> = ({
       )}
     </div>
   );
-};
+});
+
+Input.displayName = 'Input';

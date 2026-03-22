@@ -67,7 +67,7 @@ export const ChatRequestSchema = z.object({
       fitnessGoal: z.enum(['lose weight', 'build muscle', 'maintain', 'performance']),
     }),
     recentWorkouts: z.array(z.any()),
-    todayNutrition: z.any(),
+    todayNutrition: z.any().optional(),
     activeSupplements: z.array(z.any()),
   }),
 });

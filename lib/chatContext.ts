@@ -26,7 +26,7 @@ export interface ChatContext {
     reps: number | null;
     sets: number | null;
   }>;
-  todayNutrition: {
+  todayNutrition?: {
     entries: Array<{
       foodName: string;
       macros: MacroData;
@@ -82,7 +82,7 @@ USER PROFILE:
   }
 
   // Add today's nutrition if available
-  if (todayNutrition.entries.length > 0) {
+  if (todayNutrition && todayNutrition.entries.length > 0) {
     prompt += `\nTODAY'S NUTRITION:\n`;
     todayNutrition.entries.forEach((e) => {
       prompt += `- ${e.foodName}: ${e.macros.calories ?? '?'} cal, ${e.macros.protein ?? '?'}g protein\n`;

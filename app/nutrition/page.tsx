@@ -7,8 +7,9 @@ import { Navigation } from '@/components/layout/Navigation';
 import { NutritionCard } from '@/components/nutrition/NutritionCard';
 import { DailyTotals } from '@/components/nutrition/DailyTotals';
 import { MacroProgress } from '@/components/nutrition/MacroProgress';
+import { QuickAddModal } from '@/components/nutrition/QuickAddModal';
 import { Button } from '@/components/ui/Button';
-import { getNutritionByDate, getDailyTotals, updateEntryStatus } from '@/lib/services/nutritionService';
+import { getNutritionByDate, getDailyTotals, updateEntryStatus, addNutritionEntry } from '@/lib/services/nutritionService';
 import { getUserProfile } from '@/lib/services/userProfileService';
 import type { NutritionEntry, MacroData } from '@/lib/types/db';
 
@@ -26,6 +27,7 @@ export default function NutritionPage() {
   });
   const [macroTargets, setMacroTargets] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -70,6 +72,33 @@ export default function NutritionPage() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
     setSelectedDate(currentDate.toISOString().split('T')[0]);
+  };
+
+  const handleQuickAddSave = async (data: any) => {
+    try {
+      // Save each item as a separate entry
+      for (const item of data.items) {
+        await addNutritionEntry({
+          date: selectedDate,
+          foodName: item.description,
+          servingSize: '1 serving',
+          macros: {
+            calories: item.calories,
+            protein: item.protein,
+            carbohydrates: item.carbohydrates,
+            fats: item.fats,
+            sugar: item.sugar,
+            sodium: item.sodium,
+          },
+          status: 'consumed',
+        });
+      }
+      
+      // Reload data to show new entries
+      await loadData();
+    } catch (error) {
+      console.error('Error saving quick add entries:', error);
+    }
   };
 
   const formatDate = (dateStr: string) => {
@@ -120,14 +149,21 @@ export default function NutritionPage() {
           </Button>
         </div>
 
-        {/* Action button */}
-        <div className="mb-6">
+        {/* Action buttons */}
+        <div className="mb-6 flex gap-3">
           <Button
             variant="primary"
+            onClick={() => setIsQuickAddOpen(true)}
+            fullWidth
+          >
+            ✨ Quick Add
+          </Button>
+          <Button
+            variant="secondary"
             onClick={() => router.push('/nutrition/upload')}
             fullWidth
           >
-            📸 Upload Nutrition Label
+            📸 Upload Label
           </Button>
         </div>
 
@@ -161,6 +197,12 @@ export default function NutritionPage() {
           )}
         </div>
       </div>
+
+      <QuickAddModal
+        isOpen={isQuickAddOpen}
+        onClose={() => setIsQuickAddOpen(false)}
+        onSave={handleQuickAddSave}
+      />
 
       <Navigation />
     </div>
