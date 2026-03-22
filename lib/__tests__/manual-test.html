@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AthleteOS IndexedDB Manual Test</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #0a0a0a;
+      color: #e5e5e5;
+    }
+    h1 {
+      color: #10b981;
+    }
+    button {
+      background: #10b981;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    button:hover {
+      background: #059669;
+    }
+    #output {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 15px;
+      margin-top: 20px;
+      font-family: 'Courier New', monospace;
+      font-size: 13px;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    .success {
+      color: #10b981;
+    }
+    .error {
+      color: #ef4444;
+    }
+    .info {
+      color: #3b82f6;
+    }
+  </style>
+</head>
+<body>
+  <h1>AthleteOS IndexedDB Manual Test</h1>
+  <p>This page tests the IndexedDB initialization module in a real browser environment.</p>
+  
+  <div>
+    <button onclick="testInitDB()">1. Initialize Database</button>
+    <button onclick="testVerifyStores()">2. Verify Object Stores</button>
+    <button onclick="testVerifyIndexes()">3. Verify Indexes</button>
+    <button onclick="testAddData()">4. Add Test Data</button>
+    <button onclick="testQueryData()">5. Query Data</button>
+    <button onclick="testDeleteDB()">6. Delete Database</button>
+    <button onclick="clearOutput()">Clear Output</button>
+  </div>
+  
+  <div id="output"></div>
+
+  <script type="module">
+    // Inline the database initialization code for testing
+    const DB_NAME = 'athleteos-db';
+    const DB_VERSION = 1;
+
+    function initDB() {
+      return new Promise((resolve, reject) => {
+        if (!('indexedDB' in window)) {
+          reject(new Error('IndexedDB is not supported in this browser'));
+          return;
+        }
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onerror = () => {
+          reject(new Error(`Failed to open database: ${request.error?.message}`));
+        };
+
+        request.onsuccess = () => {
+          resolve(request.result);
+        };
+
+        request.onupgradeneeded = (event) => {
+          const db = event.target.result;
+          const transaction = event.target.transaction;
+
+          if (!transaction) {
+            reject(new Error('Transaction not available during upgrade'));
+            return;
+          }
+
+          if (event.oldVersion < 1) {
+            createSchemaV1(db);
+          }
+        };
+      });
+    }
+
+    function createSchemaV1(db) {
+      if (!db.objectStoreNames.contains('userProfile')) {
+        db.createObjectStore('userProfile', { keyPath: 'id' });
+      }
+
+      if (!db.objectStoreNames.contains('workouts')) {
+        const workoutStore = db.createObjectStore('workouts', { keyPath: 'id' });
+        workoutStore.createIndex('timestamp', 'timestamp', { unique: false });
+        workoutStore.createIndex('exerciseType', 'exerciseType', { unique: false });
+      }
+
+      if (!db.objectStoreNames.contains('nutrition')) {
+        const nutritionStore = db.createObjectStore('nutrition', { keyPath: 'id' });
+        nutritionStore.createIndex('date', 'date', { unique: false });
+        nutritionStore.createIndex('timestamp', 'timestamp', { unique: false });
+        nutritionStore.createIndex('status', 'status', { unique: false });
+      }
+
+      if (!db.objectStoreNames.contains('supplements')) {
+        const supplementStore = db.createObjectStore('supplements', { keyPath: 'id' });
+        supplementStore.createIndex('active', 'active', { unique: false });
+        supplementStore.createIndex('name', 'name', { unique: false });
+      }
+
+      if (!db.objectStoreNames.contains('supplementChecklist')) {
+        const checklistStore = db.createObjectStore('supplementChecklist', { keyPath: 'id' });
+        checklistStore.createIndex('date', 'date', { unique: false });
+        checklistStore.createIndex('supplementId', 'supplementId', { unique: false });
+        checklistStore.createIndex('date_supplementId', ['date', 'supplementId'], { unique: true });
+      }
+
+      if (!db.objectStoreNames.contains('chatHistory')) {
+        const chatStore = db.createObjectStore('chatHistory', { keyPath: 'id' });
+        chatStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+    }
+
+    function deleteDB() {
+      return new Promise((resolve, reject) => {
+        const request = indexedDB.deleteDatabase(DB_NAME);
+        request.onerror = () => reject(new Error(`Failed to delete database: ${request.error?.message}`));
+        request.onsuccess = () => resolve();
+        request.onblocked = () => console.warn('Database deletion blocked');
+      });
+    }
+
+    // Test functions
+    window.testInitDB = async function() {
+      try {
+        log('Initializing database...', 'info');
+        const db = await initDB();
+        log(`✓ Database initialized: ${db.name} (version ${db.version})`, 'success');
+        db.close();
+      } catch (error) {
+        log(`✗ Failed to initialize database: ${error.message}`, 'error');
+      }
+    };
+
+    window.testVerifyStores = async function() {
+      try {
+        const db = await initDB();
+        log('Verifying object stores...', 'info');
+        
+        const expectedStores = ['userProfile', 'workouts', 'nutrition', 'supplements', 'supplementChecklist', 'chatHistory'];
+        const actualStores = Array.from(db.objectStoreNames);
+        
+        log(`Expected stores: ${expectedStores.length}`, 'info');
+        log(`Actual stores: ${actualStores.length}`, 'info');
+        
+        expectedStores.forEach(storeName => {
+          if (db.objectStoreNames.contains(storeName)) {
+            log(`✓ Object store '${storeName}' exists`, 'success');
+          } else {
+            log(`✗ Object store '${storeName}' missing`, 'error');
+          }
+        });
+        
+        db.close();
+      } catch (error) {
+        log(`✗ Failed to verify stores: ${error.message}`, 'error');
+      }
+    };
+
+    window.testVerifyIndexes = async function() {
+      try {
+        const db = await initDB();
+        log('Verifying indexes...', 'info');
+        
+        // Check workouts indexes
+        const workoutTx = db.transaction('workouts', 'readonly');
+        const workoutStore = workoutTx.objectStore('workouts');
+        log(`Workouts indexes: ${Array.from(workoutStore.indexNames).join(', ')}`, 'info');
+        
+        // Check nutrition indexes
+        const nutritionTx = db.transaction('nutrition', 'readonly');
+        const nutritionStore = nutritionTx.objectStore('nutrition');
+        log(`Nutrition indexes: ${Array.from(nutritionStore.indexNames).join(', ')}`, 'info');
+        
+        // Check supplements indexes
+        const supplementTx = db.transaction('supplements', 'readonly');
+        const supplementStore = supplementTx.objectStore('supplements');
+        log(`Supplements indexes: ${Array.from(supplementStore.indexNames).join(', ')}`, 'info');
+        
+        // Check supplementChecklist indexes
+        const checklistTx = db.transaction('supplementChecklist', 'readonly');
+        const checklistStore = checklistTx.objectStore('supplementChecklist');
+        log(`SupplementChecklist indexes: ${Array.from(checklistStore.indexNames).join(', ')}`, 'info');
+        const compoundIndex = checklistStore.index('date_supplementId');
+        log(`Compound index 'date_supplementId' unique: ${compoundIndex.unique}`, 'info');
+        
+        // Check chatHistory indexes
+        const chatTx = db.transaction('chatHistory', 'readonly');
+        const chatStore = chatTx.objectStore('chatHistory');
+        log(`ChatHistory indexes: ${Array.from(chatStore.indexNames).join(', ')}`, 'info');
+        
+        log('✓ All indexes verified', 'success');
+        db.close();
+      } catch (error) {
+        log(`✗ Failed to verify indexes: ${error.message}`, 'error');
+      }
+    };
+
+    window.testAddData = async function() {
+      try {
+        const db = await initDB();
+        log('Adding test data...', 'info');
+        
+        // Add a workout
+        const workoutTx = db.transaction('workouts', 'readwrite');
+        const workoutStore = workoutTx.objectStore('workouts');
+        const workout = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          source: 'manual',
+          exerciseType: 'Push-ups',
+          estimatedReps: 20,
+          sets: 3,
+          duration: null,
+          formFeedback: null,
+          notes: 'Test workout',
+          createdAt: new Date().toISOString()
+        };
+        workoutStore.add(workout);
+        await new Promise((resolve, reject) => {
+          workoutTx.oncomplete = resolve;
+          workoutTx.onerror = reject;
+        });
+        log(`✓ Added workout: ${workout.exerciseType}`, 'success');
+        
+        db.close();
+      } catch (error) {
+        log(`✗ Failed to add data: ${error.message}`, 'error');
+      }
+    };
+
+    window.testQueryData = async function() {
+      try {
+        const db = await initDB();
+        log('Querying data...', 'info');
+        
+        const tx = db.transaction('workouts', 'readonly');
+        const store = tx.objectStore('workouts');
+        const request = store.getAll();
+        
+        request.onsuccess = () => {
+          const workouts = request.result;
+          log(`✓ Found ${workouts.length} workout(s)`, 'success');
+          workouts.forEach(w => {
+            log(`  - ${w.exerciseType} (${w.sets} sets, ${w.estimatedReps} reps)`, 'info');
+          });
+        };
+        
+        await new Promise((resolve, reject) => {
+          tx.oncomplete = resolve;
+          tx.onerror = reject;
+        });
+        
+        db.close();
+      } catch (error) {
+        log(`✗ Failed to query data: ${error.message}`, 'error');
+      }
+    };
+
+    window.testDeleteDB = async function() {
+      try {
+        log('Deleting database...', 'info');
+        await deleteDB();
+        log('✓ Database deleted successfully', 'success');
+      } catch (error) {
+        log(`✗ Failed to delete database: ${error.message}`, 'error');
+      }
+    };
+
+    window.clearOutput = function() {
+      document.getElementById('output').innerHTML = '';
+    };
+
+    function log(message, type = 'info') {
+      const output = document.getElementById('output');
+      const line = document.createElement('div');
+      line.className = type;
+      line.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+      output.appendChild(line);
+      output.scrollTop = output.scrollHeight;
+    }
+
+    // Auto-run initialization test on load
+    log('Page loaded. Click buttons to run tests.', 'info');
+  </script>
+</body>
+</html>
