@@ -197,7 +197,9 @@ export function WaterIntakeCard({
       {showCustom && (
         <div className="flex gap-2 mb-4">
           <Input
-            type="number"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             placeholder="Amount (oz)"
             value={customAmount}
             onChange={(e) => setCustomAmount(e.target.value)}

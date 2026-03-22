@@ -95,7 +95,9 @@ export default function ManualWorkoutPage() {
 
             <Input
               label="Reps"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Number of repetitions"
               value={reps}
               onChange={(e) => setReps(e.target.value)}
@@ -104,7 +106,9 @@ export default function ManualWorkoutPage() {
 
             <Input
               label="Sets"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Number of sets"
               value={sets}
               onChange={(e) => setSets(e.target.value)}
@@ -113,7 +117,9 @@ export default function ManualWorkoutPage() {
 
             <Input
               label="Duration (minutes)"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Workout duration"
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
@@ -122,7 +128,9 @@ export default function ManualWorkoutPage() {
 
             <Input
               label="Calories Burned"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               placeholder="Estimated calories burned"
               value={caloriesBurned}
               onChange={(e) => setCaloriesBurned(e.target.value)}

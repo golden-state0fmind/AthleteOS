@@ -246,7 +246,9 @@ export default function SettingsPage() {
 
             <Input
               label="Age"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               error={errors.age}
@@ -254,7 +256,9 @@ export default function SettingsPage() {
 
             <Input
               label="Weight (kg)"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*\.?[0-9]*"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               error={errors.weight}
@@ -262,7 +266,9 @@ export default function SettingsPage() {
 
             <Input
               label="Height (cm)"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              pattern="[0-9]*\.?[0-9]*"
               value={height}
               onChange={(e) => setHeight(e.target.value)}
               error={errors.height}
@@ -320,7 +326,9 @@ export default function SettingsPage() {
           <div className="mb-6">
             <Input
               label="Daily Water Target (oz)"
-              type="number"
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]*"
               value={waterTarget}
               onChange={(e) => setWaterTarget(e.target.value)}
               helperText="Recommended: 64-128oz per day (1 gallon = 128oz)"
@@ -355,7 +363,9 @@ export default function SettingsPage() {
 
               <Input
                 label="Calories"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 error={errors.calories}
@@ -364,7 +374,9 @@ export default function SettingsPage() {
 
               <Input
                 label="Protein (g)"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={protein}
                 onChange={(e) => setProtein(e.target.value)}
                 error={errors.protein}
@@ -372,7 +384,9 @@ export default function SettingsPage() {
 
               <Input
                 label="Carbohydrates (g)"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={carbohydrates}
                 onChange={(e) => setCarbohydrates(e.target.value)}
                 error={errors.carbohydrates}
@@ -380,7 +394,9 @@ export default function SettingsPage() {
 
               <Input
                 label="Fats (g)"
-                type="number"
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={fats}
                 onChange={(e) => setFats(e.target.value)}
                 error={errors.fats}
