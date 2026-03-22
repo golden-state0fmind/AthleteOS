@@ -307,7 +307,14 @@ export default function SettingsPage() {
 
         {/* Macro Targets */}
         <Card padding="lg" className="mb-6">
-          <h2 className="text-xl font-semibold text-white mb-4">Daily Targets</h2>
+          <div className="flex items-start justify-between mb-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white mb-1">Daily Targets</h2>
+              <p className="text-sm text-white/60">
+                Set your daily nutrition and hydration goals to track progress on your dashboard
+              </p>
+            </div>
+          </div>
           
           {/* Water Target */}
           <div className="mb-6">
@@ -333,16 +340,26 @@ export default function SettingsPage() {
               />
               <span className="text-white/80">Set daily macro targets</span>
             </label>
+            <p className="text-xs text-white/50 mt-1 ml-7">
+              Enable this to track your calorie budget and macro goals on the dashboard
+            </p>
           </div>
 
           {hasTargets && (
             <div className="space-y-4">
+              <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 mb-4">
+                <p className="text-sm text-white/80">
+                  💡 <span className="font-medium">Tip:</span> Your calorie budget will be calculated based on these targets and displayed on your dashboard, showing how food intake and workout calories affect your daily balance.
+                </p>
+              </div>
+
               <Input
                 label="Calories"
                 type="number"
                 value={calories}
                 onChange={(e) => setCalories(e.target.value)}
                 error={errors.calories}
+                helperText="Daily calorie target based on your fitness goal"
               />
 
               <Input

@@ -18,6 +18,7 @@ export default function ManualWorkoutPage() {
   const [reps, setReps] = useState('');
   const [sets, setSets] = useState('');
   const [duration, setDuration] = useState('');
+  const [caloriesBurned, setCaloriesBurned] = useState('');
   const [notes, setNotes] = useState('');
 
   const validateForm = (): boolean => {
@@ -39,6 +40,10 @@ export default function ManualWorkoutPage() {
       newErrors.duration = 'Duration must be a positive number';
     }
 
+    if (caloriesBurned && (isNaN(parseInt(caloriesBurned)) || parseInt(caloriesBurned) < 0)) {
+      newErrors.caloriesBurned = 'Calories must be a positive number';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -58,6 +63,7 @@ export default function ManualWorkoutPage() {
         estimatedReps: reps ? parseInt(reps) : null,
         sets: sets ? parseInt(sets) : null,
         duration: duration ? parseInt(duration) : null,
+        caloriesBurned: caloriesBurned ? parseInt(caloriesBurned) : null,
         formFeedback: null,
         notes: notes.trim() || null,
       });
@@ -112,6 +118,15 @@ export default function ManualWorkoutPage() {
               value={duration}
               onChange={(e) => setDuration(e.target.value)}
               error={errors.duration}
+            />
+
+            <Input
+              label="Calories Burned"
+              type="number"
+              placeholder="Estimated calories burned"
+              value={caloriesBurned}
+              onChange={(e) => setCaloriesBurned(e.target.value)}
+              error={errors.caloriesBurned}
             />
 
             <div>

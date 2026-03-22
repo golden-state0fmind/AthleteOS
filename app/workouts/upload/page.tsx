@@ -64,6 +64,7 @@ export default function WorkoutUploadPage() {
         estimatedReps: result.estimatedReps,
         sets: null,
         duration: null,
+        caloriesBurned: result.caloriesBurned,
         formFeedback: result.formFeedback,
         notes: null,
       });
@@ -85,7 +86,7 @@ export default function WorkoutUploadPage() {
       <div className="max-w-screen-xl mx-auto px-4 py-6">
         <Card padding="md" className="mb-4">
           <p className="text-white/80 text-sm">
-            Upload a photo of your workout to get AI-powered form feedback and exercise tracking.
+            Upload a workout photo or screenshot to get AI-powered analysis. Works with live workout photos (for form feedback) or workout summary screenshots from fitness apps (for performance insights).
           </p>
         </Card>
 

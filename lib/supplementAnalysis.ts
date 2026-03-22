@@ -114,6 +114,14 @@ If no interactions are found, set "interactions" to null.`;
   const responseText = textContent && textContent.type === 'text' ? textContent.text : '{}';
 
   // Parse and return the structured result
-  const result: SupplementAnalysisResult = JSON.parse(responseText);
+  // Remove markdown code blocks if present
+  let cleanedResponse = responseText.trim();
+  if (cleanedResponse.startsWith('```json')) {
+    cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/```\s*$/, '');
+  } else if (cleanedResponse.startsWith('```')) {
+    cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/```\s*$/, '');
+  }
+  
+  const result: SupplementAnalysisResult = JSON.parse(cleanedResponse);
   return result;
 }

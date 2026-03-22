@@ -52,6 +52,11 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workout, onClick }) =>
                 <span className="text-white/80">Duration:</span> {workout.duration} min
               </span>
             )}
+            {workout.caloriesBurned !== null && (
+              <span className="text-accent">
+                <span className="text-white/80">🔥</span> {workout.caloriesBurned} cal
+              </span>
+            )}
           </div>
 
           {workout.formFeedback && (

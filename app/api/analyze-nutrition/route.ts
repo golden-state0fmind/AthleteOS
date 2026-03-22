@@ -54,10 +54,18 @@ export async function POST(request: Request) {
       NUTRITION_ANALYSIS_PROMPT
     );
 
-    // Parse Claude's JSON response
+    // Parse Claude's JSON response (handle markdown code blocks)
     let analysisResult: NutritionAnalysisResponse;
     try {
-      analysisResult = JSON.parse(responseText);
+      // Remove markdown code blocks if present
+      let cleanedResponse = responseText.trim();
+      if (cleanedResponse.startsWith('```json')) {
+        cleanedResponse = cleanedResponse.replace(/^```json\s*/, '').replace(/```\s*$/, '');
+      } else if (cleanedResponse.startsWith('```')) {
+        cleanedResponse = cleanedResponse.replace(/^```\s*/, '').replace(/```\s*$/, '');
+      }
+      
+      analysisResult = JSON.parse(cleanedResponse);
     } catch (parseError) {
       console.error('Failed to parse Claude response:', responseText);
       return NextResponse.json(

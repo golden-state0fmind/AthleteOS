@@ -37,6 +37,7 @@ export interface WorkoutEntry {
   estimatedReps: number | null;
   sets: number | null;
   duration: number | null; // minutes
+  caloriesBurned: number | null; // estimated calories burned
   formFeedback: string | null;
   notes: string | null;
   createdAt: string; // ISO 8601 timestamp

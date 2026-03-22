@@ -3,11 +3,13 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { DailyMetrics } from '@/components/dashboard/DailyMetrics';
+import { CalorieBudgetCard } from '@/components/dashboard/CalorieBudgetCard';
 import { QuickChat } from '@/components/dashboard/QuickChat';
 import { StreakDisplay } from '@/components/dashboard/StreakDisplay';
 import { Navigation } from '@/components/layout/Navigation';
+import { Card } from '@/components/ui/Card';
 import { getUserProfile } from '@/lib/services/userProfileService';
-import { getWorkouts, calculateWorkoutStreak } from '@/lib/services/workoutService';
+import { getWorkouts, calculateWorkoutStreak, getDailyCaloriesBurned } from '@/lib/services/workoutService';
 import { getNutritionByDate, getDailyTotals } from '@/lib/services/nutritionService';
 import { getTodayChecklist } from '@/lib/services/supplementService';
 import { getDailyWaterTotal } from '@/lib/services/waterIntakeService';
@@ -20,6 +22,8 @@ export default function DashboardPage() {
   // Dashboard data
   const [caloriesConsumed, setCaloriesConsumed] = useState(0);
   const [caloriesTarget, setCaloriesTarget] = useState<number | undefined>(undefined);
+  const [caloriesBurned, setCaloriesBurned] = useState(0);
+  const [fitnessGoal, setFitnessGoal] = useState<'lose weight' | 'build muscle' | 'maintain' | 'performance'>('maintain');
   const [workoutCount, setWorkoutCount] = useState(0);
   const [supplementsTaken, setSupplementsTaken] = useState(0);
   const [supplementsScheduled, setSupplementsScheduled] = useState(0);
@@ -73,6 +77,13 @@ export default function DashboardPage() {
     const dailyTotals = await getDailyTotals(today);
     setCaloriesConsumed(dailyTotals.calories || 0);
     setCaloriesTarget(profile.macroTargets?.calories);
+    
+    // Load fitness goal
+    setFitnessGoal(profile.fitnessGoal || 'maintain');
+    
+    // Load calories burned from workouts
+    const caloriesBurnedToday = await getDailyCaloriesBurned(today);
+    setCaloriesBurned(caloriesBurnedToday);
     
     // Load water intake
     const waterTotal = await getDailyWaterTotal(today);
@@ -128,6 +139,37 @@ export default function DashboardPage() {
         </header>
 
         <div className="space-y-4">
+          {/* Setup prompt when no calorie target is set */}
+          {!caloriesTarget && (
+            <Card padding="md" className="bg-accent/10 border border-accent/30">
+              <div className="flex items-start gap-3">
+                <span className="text-2xl">💡</span>
+                <div className="flex-1">
+                  <h3 className="text-white font-medium mb-1">Set Your Daily Targets</h3>
+                  <p className="text-sm text-white/80 mb-3">
+                    Track your calorie budget and see how workouts affect your daily balance. Set your targets in Settings to get started.
+                  </p>
+                  <button
+                    onClick={() => router.push('/settings')}
+                    className="text-sm text-accent font-medium hover:underline"
+                  >
+                    Go to Settings →
+                  </button>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {/* Calorie Budget - Prominent placement at top */}
+          {caloriesTarget && (
+            <CalorieBudgetCard
+              caloriesConsumed={caloriesConsumed}
+              caloriesBurned={caloriesBurned}
+              caloriesTarget={caloriesTarget}
+              fitnessGoal={fitnessGoal}
+            />
+          )}
+
           {/* Daily Metrics */}
           <DailyMetrics
             caloriesConsumed={caloriesConsumed}

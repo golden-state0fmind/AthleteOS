@@ -74,16 +74,25 @@ export async function analyzeImageWithClaude(
  * Prompt template for workout image analysis
  * 
  * Instructs Claude to identify exercise type, count reps, and provide form feedback.
+ * Handles both live workout photos and workout summary screenshots.
  */
-export const WORKOUT_ANALYSIS_PROMPT = `Analyze this workout image and provide:
-1. Exercise type (e.g., "Push-ups", "Squats", "Deadlift")
-2. Estimated repetitions visible (or null if not countable)
-3. Form feedback (brief assessment of technique)
+export const WORKOUT_ANALYSIS_PROMPT = `Analyze this workout image. This could be either:
+1. A photo of someone performing an exercise (assess form and technique)
+2. A screenshot of a workout summary/stats from a fitness app or device
+
+Based on what you see, provide:
+- Exercise type: Identify the workout type (e.g., "HIIT", "Running", "Push-ups", "Cycling", "Strength Training")
+- Estimated reps: If visible/countable from the image or stats, otherwise null
+- Calories burned: Extract from the image if shown, or estimate based on exercise type and duration. If no information is available, return null.
+- Form feedback: 
+  * For live workout photos: Assess technique and form
+  * For workout summaries/screenshots: Provide insights based on the metrics shown (pace, heart rate, duration, calories, distance, etc.). Comment on performance, intensity, and any notable patterns.
 
 Return ONLY valid JSON in this exact format:
 {
   "exerciseType": "string",
   "estimatedReps": number or null,
+  "caloriesBurned": number or null,
   "formFeedback": "string",
   "confidence": "high" | "medium" | "low"
 }`;

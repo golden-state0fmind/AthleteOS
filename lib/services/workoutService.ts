@@ -130,6 +130,23 @@ export async function getWorkoutsByDateRange(
 }
 
 /**
+ * Calculates total calories burned from workouts for a specific date.
+ * 
+ * @param date Date in YYYY-MM-DD format
+ * @returns Promise<number> Total calories burned for the date
+ */
+export async function getDailyCaloriesBurned(date: string): Promise<number> {
+  const startDate = new Date(date).toISOString();
+  const endDate = new Date(date + 'T23:59:59').toISOString();
+  
+  const workouts = await getWorkoutsByDateRange(startDate, endDate);
+  
+  return workouts.reduce((total, workout) => {
+    return total + (workout.caloriesBurned || 0);
+  }, 0);
+}
+
+/**
  * Calculates the current and longest workout streaks in consecutive days.
  * A streak is maintained if there is at least one workout per day.
  * 
