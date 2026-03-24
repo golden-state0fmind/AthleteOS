@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Auto-update OpenAPI docs on new API route",
+  "description": "When a new API route is created, update or create /docs/api.md to document the route including request body, response shape, and Claude model used",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "app/api/**/route.ts"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new API route was just created. Update or create /docs/api.md to document this route. Include: the endpoint path, HTTP method, expected request body schema, response shape, which Claude model it calls (if any), and a brief description of what it does."
+  }
+}

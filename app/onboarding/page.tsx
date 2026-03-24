@@ -130,13 +130,26 @@ export default function OnboardingPage() {
       // Convert lbs to kg for storage
       const weightInKg = parseFloat(weight) * 0.453592;
 
-      await createUserProfile({
+      console.log('Creating profile with data:', {
+        name: name.trim(),
+        age,
+        weight: weightInKg,
+        height: heightInCm,
+        fitnessGoal,
+      });
+
+      const profile = await createUserProfile({
         name: name.trim(),
         age: age,
         weight: weightInKg,
         height: heightInCm,
         fitnessGoal: fitnessGoal as FitnessGoal,
       });
+
+      console.log('Profile created successfully:', profile);
+
+      // Small delay to ensure IndexedDB write completes
+      await new Promise(resolve => setTimeout(resolve, 100));
 
       // Redirect to dashboard after successful profile creation
       router.push('/');

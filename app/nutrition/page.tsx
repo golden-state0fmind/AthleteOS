@@ -208,7 +208,7 @@ export default function NutritionPage() {
 
         {/* Daily totals */}
         <div className="mb-6">
-          <DailyTotals totals={dailyTotals} />
+          <DailyTotals totals={dailyTotals} date={selectedDate} />
         </div>
 
         {/* Water Intake */}

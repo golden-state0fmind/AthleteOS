@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Run TypeScript type check on schema change",
+  "description": "When type definition files are modified, run TypeScript compiler to check for type errors",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "types/**/*.ts",
+      "types/**/*.d.ts"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "npx tsc --noEmit"
+  }
+}

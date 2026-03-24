@@ -1,0 +1,17 @@
+{
+  "enabled": true,
+  "name": "Auto-add new components to README",
+  "description": "When a new component is created, append the component name, file path, and description to the Components section of README.md",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "app/components/**/*.tsx",
+      "components/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A new component was just created. Add an entry to the Components section of README.md with the component name, file path, and a one-line description of its purpose based on the component's code."
+  }
+}

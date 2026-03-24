@@ -1,4 +1,4 @@
-const CACHE_NAME = 'athleteos-v1';
+const CACHE_NAME = 'athleteos-v2';
 const OFFLINE_URL = '/offline';
 
 // Install event: Cache app shell
@@ -50,7 +50,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // App shell: Cache first, fallback to network
+  // HTML navigation requests: Network first, fallback to cache
+  if (request.mode === 'navigate' || request.headers.get('accept')?.includes('text/html')) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful responses
+          if (response.status === 200) {
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseToCache);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Fallback to cache, then offline page
+          return caches.match(request).then((cachedResponse) => {
+            return cachedResponse || caches.match(OFFLINE_URL);
+          });
+        })
+    );
+    return;
+  }
+
+  // Static assets: Cache first, fallback to network
   event.respondWith(
     caches.match(request).then((response) => {
       if (response) {
@@ -67,10 +91,6 @@ self.addEventListener('fetch', (event) => {
         }
         return response;
       }).catch(() => {
-        // Return offline page for navigation requests
-        if (request.mode === 'navigate') {
-          return caches.match(OFFLINE_URL);
-        }
         return new Response('Offline', { status: 503 });
       });
     })

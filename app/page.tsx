@@ -52,9 +52,11 @@ export default function DashboardPage() {
   const checkProfileAndLoadData = async () => {
     try {
       const profile = await getUserProfile();
+      console.log('Profile check result:', profile);
       
       if (!profile) {
         // Redirect to onboarding if no profile exists
+        console.log('No profile found, redirecting to onboarding');
         router.push('/onboarding');
         return;
       }

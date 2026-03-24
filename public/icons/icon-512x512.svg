@@ -1,0 +1,5 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#0D1117"/>
+  <circle cx="256" cy="256" r="170.66666666666666" fill="#00D48A"/>
+  <text x="256" y="320" font-family="Arial, sans-serif" font-size="128" font-weight="bold" fill="#0D1117" text-anchor="middle">AOS</text>
+</svg>

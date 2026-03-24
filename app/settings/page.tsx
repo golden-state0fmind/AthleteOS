@@ -22,7 +22,8 @@ export default function SettingsPage() {
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
   const [weight, setWeight] = useState('');
-  const [height, setHeight] = useState('');
+  const [heightFeet, setHeightFeet] = useState('');
+  const [heightInches, setHeightInches] = useState('');
   const [fitnessGoal, setFitnessGoal] = useState<FitnessGoal>('maintain');
 
   // Macro targets
@@ -46,8 +47,18 @@ export default function SettingsPage() {
       if (profile) {
         setName(profile.name);
         setAge(profile.age.toString());
-        setWeight(profile.weight.toString());
-        setHeight(profile.height.toString());
+        
+        // Convert kg to lbs for display
+        const weightLbs = Math.round(profile.weight * 2.20462);
+        setWeight(weightLbs.toString());
+        
+        // Convert cm to feet and inches for display
+        const totalInches = Math.round(profile.height / 2.54);
+        const feet = Math.floor(totalInches / 12);
+        const inches = totalInches % 12;
+        setHeightFeet(feet.toString());
+        setHeightInches(inches.toString());
+        
         setFitnessGoal(profile.fitnessGoal);
         setWaterTarget((profile.dailyWaterTarget || 128).toString()); // 1 gallon default
 
@@ -79,13 +90,17 @@ export default function SettingsPage() {
     }
 
     const weightNum = parseFloat(weight);
-    if (!weight || isNaN(weightNum) || weightNum < 20 || weightNum > 300) {
-      newErrors.weight = 'Please enter a valid weight (20-300 kg)';
+    if (!weight || isNaN(weightNum) || weightNum < 44 || weightNum > 660) {
+      newErrors.weight = 'Please enter a valid weight (44-660 lbs)';
     }
 
-    const heightNum = parseFloat(height);
-    if (!height || isNaN(heightNum) || heightNum < 100 || heightNum > 250) {
-      newErrors.height = 'Please enter a valid height (100-250 cm)';
+    const feetNum = parseInt(heightFeet);
+    const inchesNum = parseInt(heightInches);
+    if (!heightFeet || isNaN(feetNum) || feetNum < 3 || feetNum > 8) {
+      newErrors.heightFeet = 'Please enter valid feet (3-8)';
+    }
+    if (heightInches === '' || isNaN(inchesNum) || inchesNum < 0 || inchesNum > 11) {
+      newErrors.heightInches = 'Please enter valid inches (0-11)';
     }
 
     if (hasTargets) {
@@ -123,11 +138,18 @@ export default function SettingsPage() {
     setSuccessMessage('');
 
     try {
+      // Convert lbs to kg for storage
+      const weightKg = parseFloat(weight) / 2.20462;
+      
+      // Convert feet and inches to cm for storage
+      const totalInches = parseInt(heightFeet) * 12 + parseInt(heightInches);
+      const heightCm = totalInches * 2.54;
+
       const updates: Partial<UserProfile> = {
         name: name.trim(),
         age: parseInt(age),
-        weight: parseFloat(weight),
-        height: parseFloat(height),
+        weight: weightKg,
+        height: heightCm,
         fitnessGoal,
         dailyWaterTarget: parseInt(waterTarget) || 128, // 1 gallon default
       };
@@ -255,7 +277,7 @@ export default function SettingsPage() {
             />
 
             <Input
-              label="Weight (kg)"
+              label="Weight (lbs)"
               type="text"
               inputMode="decimal"
               pattern="[0-9]*\.?[0-9]*"
@@ -264,15 +286,31 @@ export default function SettingsPage() {
               error={errors.weight}
             />
 
-            <Input
-              label="Height (cm)"
-              type="text"
-              inputMode="decimal"
-              pattern="[0-9]*\.?[0-9]*"
-              value={height}
-              onChange={(e) => setHeight(e.target.value)}
-              error={errors.height}
-            />
+            <div>
+              <label className="block text-sm font-medium text-white/80 mb-2">
+                Height
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="Feet"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={heightFeet}
+                  onChange={(e) => setHeightFeet(e.target.value)}
+                  error={errors.heightFeet}
+                />
+                <Input
+                  label="Inches"
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  value={heightInches}
+                  onChange={(e) => setHeightInches(e.target.value)}
+                  error={errors.heightInches}
+                />
+              </div>
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-white/80 mb-2">

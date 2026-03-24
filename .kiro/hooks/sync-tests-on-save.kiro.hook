@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Auto-update tests on file save",
+  "description": "When files in /app/api/ or /lib/ are saved, check if corresponding test files exist and prompt Kiro to review and update them",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "app/api/**/*.ts",
+      "app/api/**/*.tsx",
+      "lib/**/*.ts",
+      "lib/**/*.tsx"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A file was just modified. Check if a corresponding test file exists (in __tests__ directory or with .test.ts suffix). If it exists, review the test file and update it to reflect any changes in the implementation. Ensure test coverage remains comprehensive."
+  }
+}
