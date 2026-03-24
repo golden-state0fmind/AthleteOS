@@ -16,7 +16,7 @@
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
 import { NutritionImageSchema } from '@/lib/validation';
-import { analyzeImageWithClaude, NUTRITION_ANALYSIS_PROMPT } from '@/lib/visionAnalysis';
+import { analyzeImageWithClaude, NUTRITION_ANALYSIS_PROMPT, buildNutritionPromptWithContext } from '@/lib/visionAnalysis';
 
 /**
  * Nutrition analysis response structure
@@ -47,11 +47,20 @@ export async function POST(request: Request) {
     const body = await request.json();
     const validated = NutritionImageSchema.parse(body);
 
+    // Build prompt with additional context if provided
+    let prompt = NUTRITION_ANALYSIS_PROMPT;
+    if (body.additionalContext || body.servings) {
+      prompt = buildNutritionPromptWithContext(
+        body.additionalContext,
+        body.servings
+      );
+    }
+
     // Call Claude API with vision analysis
     const responseText = await analyzeImageWithClaude(
       validated.image,
       validated.mimeType,
-      NUTRITION_ANALYSIS_PROMPT
+      prompt
     );
 
     // Parse Claude's JSON response (handle markdown code blocks)
@@ -81,6 +90,37 @@ export async function POST(request: Request) {
         { error: 'Invalid analysis results received. Please try again.' },
         { status: 500 }
       );
+    }
+
+    // Apply servings multiplier if provided
+    const servings = body.servings && body.servings > 0 ? body.servings : 1;
+    if (servings !== 1) {
+      // Multiply all macro values by servings
+      analysisResult.macros = {
+        calories: analysisResult.macros.calories !== null 
+          ? Math.round(analysisResult.macros.calories * servings) 
+          : null,
+        protein: analysisResult.macros.protein !== null 
+          ? Math.round(analysisResult.macros.protein * servings * 10) / 10 
+          : null,
+        carbohydrates: analysisResult.macros.carbohydrates !== null 
+          ? Math.round(analysisResult.macros.carbohydrates * servings * 10) / 10 
+          : null,
+        fats: analysisResult.macros.fats !== null 
+          ? Math.round(analysisResult.macros.fats * servings * 10) / 10 
+          : null,
+        sugar: analysisResult.macros.sugar !== null 
+          ? Math.round(analysisResult.macros.sugar * servings * 10) / 10 
+          : null,
+        sodium: analysisResult.macros.sodium !== null 
+          ? Math.round(analysisResult.macros.sodium * servings) 
+          : null,
+      };
+      
+      // Update serving size to reflect multiple servings
+      if (analysisResult.servingSize) {
+        analysisResult.servingSize = `${analysisResult.servingSize} × ${servings}`;
+      }
     }
 
     // Return structured response with partial data support

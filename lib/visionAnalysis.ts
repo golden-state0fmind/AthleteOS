@@ -123,3 +123,51 @@ Return ONLY valid JSON in this exact format:
 }
 
 Use null for any values that cannot be read from the label.`;
+
+/**
+ * Builds a nutrition analysis prompt with additional context
+ * 
+ * @param additionalContext - Optional user-provided context about the food
+ * @param servings - Number of servings (used for context only, calculation done server-side)
+ * @returns Enhanced prompt string
+ */
+export function buildNutritionPromptWithContext(
+  additionalContext?: string,
+  servings?: number
+): string {
+  let contextNote = '';
+  
+  if (additionalContext || (servings && servings !== 1)) {
+    contextNote = '\n\nAdditional context from user:\n';
+    if (servings && servings !== 1) {
+      contextNote += `- User is consuming ${servings} serving(s)\n`;
+    }
+    if (additionalContext) {
+      contextNote += `- ${additionalContext}\n`;
+    }
+    contextNote += '\nPlease extract the nutrition information for ONE serving as shown on the label. The serving multiplier will be applied automatically.';
+  }
+
+  return `Extract nutrition information from this food label image. Provide:
+1. Food name
+2. Serving size (as shown on the label for ONE serving)
+3. Macronutrients per serving: calories, protein (g), carbohydrates (g), fats (g), sugar (g), sodium (mg)
+${contextNote}
+
+Return ONLY valid JSON in this exact format:
+{
+  "foodName": "string or null",
+  "servingSize": "string or null",
+  "macros": {
+    "calories": number or null,
+    "protein": number or null,
+    "carbohydrates": number or null,
+    "fats": number or null,
+    "sugar": number or null,
+    "sodium": number or null
+  },
+  "confidence": "high" | "medium" | "low"
+}
+
+Use null for any values that cannot be read from the label.`;
+}

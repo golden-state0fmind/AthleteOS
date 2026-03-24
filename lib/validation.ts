@@ -33,6 +33,8 @@ export const NutritionImageSchema = z.object({
   mimeType: z.enum(['image/jpeg', 'image/png', 'image/webp'], {
     errorMap: () => ({ message: 'Invalid image format. Supported formats: JPEG, PNG, WebP' }),
   }),
+  additionalContext: z.string().optional(),
+  servings: z.number().positive().optional(),
 });
 
 export type NutritionImageRequest = z.infer<typeof NutritionImageSchema>;

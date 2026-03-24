@@ -17,6 +17,8 @@ export default function NutritionUploadPage() {
   const [preview, setPreview] = useState<string | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [additionalContext, setAdditionalContext] = useState<string>('');
+  const [servings, setServings] = useState<string>('1');
   
   // Analysis result
   const [analysisResult, setAnalysisResult] = useState<any>(null);
@@ -34,6 +36,8 @@ export default function NutritionUploadPage() {
     setPreview(null);
     setError(null);
     setAnalysisResult(null);
+    setAdditionalContext('');
+    setServings('1');
   };
 
   const handleAnalyze = async () => {
@@ -55,6 +59,8 @@ export default function NutritionUploadPage() {
         body: JSON.stringify({
           image: base64Data,
           mimeType: selectedFile.type,
+          additionalContext: additionalContext.trim() || undefined,
+          servings: servings ? parseFloat(servings) : 1,
         }),
       });
 
@@ -127,7 +133,46 @@ export default function NutritionUploadPage() {
         )}
 
         {preview && !analysisResult && (
-          <div className="mt-4">
+          <div className="mt-4 space-y-4">
+            <Card padding="md">
+              <div className="space-y-4">
+                <div>
+                  <label htmlFor="servings" className="block text-sm font-medium text-white/80 mb-2">
+                    Number of Servings
+                  </label>
+                  <Input
+                    id="servings"
+                    type="number"
+                    min="0.1"
+                    step="0.1"
+                    value={servings}
+                    onChange={(e) => setServings(e.target.value)}
+                    placeholder="1"
+                  />
+                  <p className="text-xs text-white/60 mt-1">
+                    How many servings are you consuming? (e.g., 1.5 for one and a half servings)
+                  </p>
+                </div>
+
+                <div>
+                  <label htmlFor="context" className="block text-sm font-medium text-white/80 mb-2">
+                    Additional Context (Optional)
+                  </label>
+                  <textarea
+                    id="context"
+                    value={additionalContext}
+                    onChange={(e) => setAdditionalContext(e.target.value)}
+                    placeholder="e.g., 'This is a family-size package' or 'Only eating half the container'"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent resize-none"
+                    rows={3}
+                  />
+                  <p className="text-xs text-white/60 mt-1">
+                    Provide any additional details to help with accurate analysis
+                  </p>
+                </div>
+              </div>
+            </Card>
+
             <Button
               variant="primary"
               onClick={handleAnalyze}
