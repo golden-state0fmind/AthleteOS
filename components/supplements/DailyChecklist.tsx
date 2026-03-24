@@ -19,7 +19,19 @@ export const DailyChecklist: React.FC<DailyChecklistProps> = ({
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return 'Today';
-    const date = new Date(dateStr);
+    
+    // Parse the date string as local time to avoid timezone issues
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+    
+    // Check if it's today
+    const today = new Date();
+    const isToday = date.getDate() === today.getDate() &&
+                    date.getMonth() === today.getMonth() &&
+                    date.getFullYear() === today.getFullYear();
+    
+    if (isToday) return 'Today';
+    
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric'
